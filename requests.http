@@ -1,0 +1,187 @@
+### Variables
+@baseUrl = http://localhost:8080
+@authToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNzk5NTE5NywiZXhwIjoxNzM4MDgxNTk3fQ.oPth5VlZXfK1Z5Jcb0zn5bcuCiYoq2WwBALJDS1MMzs
+@profileImageUrl = https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80
+@contactImageUrl = https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80
+
+### Register a new user
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "name": "Test User",
+    "email": "testuser@example.com",
+    "password": "password123"
+}
+
+### Login
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "username": "testuser",
+    "password": "password123"
+}
+
+### Forgot Password
+POST {{baseUrl}}/api/v1/auth/forgot-password
+Content-Type: application/json
+
+{
+    "email": "testuser@example.com"
+}
+
+### Reset Password
+POST {{baseUrl}}/api/v1/auth/reset-password
+Content-Type: application/json
+
+{
+    "token": "reset_token_received_in_email",
+    "newPassword": "newpassword123"
+}
+
+### Get Current User Profile
+GET {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{authToken}}
+
+### Update User Profile
+PUT {{baseUrl}}/api/v1/users/me
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "name": "Updated Name",
+    "email": "updated@example.com"
+}
+
+### Update Profile Picture (using Unsplash image)
+PUT {{baseUrl}}/api/v1/users/me/photo
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< {{profileImageUrl}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Get All Contacts (Paginated)
+GET {{baseUrl}}/api/v1/contacts?page=0&size=10
+Authorization: Bearer {{authToken}}
+
+### Get Single Contact
+GET {{baseUrl}}/api/v1/contacts/1
+Authorization: Bearer {{authToken}}
+
+### Create New Contact
+POST {{baseUrl}}/api/v1/contacts
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "name": "John Doe",
+    "phoneNumber": "+1234567890",
+    "email": "john@example.com",
+    "description": "Work colleague",
+    "address": "123 Main St, City"
+}
+
+### Update Contact
+PUT {{baseUrl}}/api/v1/contacts/1
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "name": "John Doe Updated",
+    "phoneNumber": "+1234567890",
+    "email": "john.updated@example.com",
+    "description": "Work colleague - Team Lead",
+    "address": "456 New St, City"
+}
+
+### Delete Contact
+DELETE {{baseUrl}}/api/v1/contacts/1
+Authorization: Bearer {{authToken}}
+
+### Update Contact Photo (using Unsplash image)
+PUT {{baseUrl}}/api/v1/contacts/1/photo
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="file"; filename="contact.jpg"
+Content-Type: image/jpeg
+
+< {{contactImageUrl}}
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+### Example Responses:
+
+# Register Response
+# {
+#     "token": "eyJhbGciOiJIUzI1NiJ9...",
+#     "user": {
+#         "id": 1,
+#         "username": "testuser",
+#         "name": "Test User",
+#         "email": "testuser@example.com",
+#         "photoUrl": null
+#     }
+# }
+
+# Login Response
+# {
+#     "token": "eyJhbGciOiJIUzI1NiJ9...",
+#     "user": {
+#         "id": 1,
+#         "username": "testuser",
+#         "name": "Test User",
+#         "email": "testuser@example.com",
+#         "photoUrl": null
+#     }
+# }
+
+# Contact Response
+# {
+#     "id": 1,
+#     "name": "John Doe",
+#     "phoneNumber": "+1234567890",
+#     "email": "john@example.com",
+#     "description": "Work colleague",
+#     "address": "123 Main St, City",
+#     "photoUrl": null
+# }
+
+# Contacts List Response
+# {
+#     "content": [
+#         {
+#             "id": 1,
+#             "name": "John Doe",
+#             "phoneNumber": "+1234567890",
+#             "email": "john@example.com",
+#             "description": "Work colleague",
+#             "address": "123 Main St, City",
+#             "photoUrl": null
+#         }
+#     ],
+#     "pageable": {
+#         "pageNumber": 0,
+#         "pageSize": 10,
+#         "sort": [],
+#         "offset": 0,
+#         "paged": true,
+#         "unpaged": false
+#     },
+#     "totalElements": 1,
+#     "totalPages": 1,
+#     "last": true,
+#     "size": 10,
+#     "number": 0,
+#     "sort": [],
+#     "numberOfElements": 1,
+#     "first": true,
+#     "empty": false
+# } 
