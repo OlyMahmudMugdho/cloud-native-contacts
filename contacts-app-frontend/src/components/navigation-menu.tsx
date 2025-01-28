@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/store/auth"
+import { ThemeSwitcher } from "./theme-switcher"
 
 export function NavigationMenu() {
   const router = useRouter()
@@ -48,6 +49,7 @@ export function NavigationMenu() {
           )}
         </div>
         <div className="ml-auto flex items-center space-x-4">
+          <ThemeSwitcher />
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
