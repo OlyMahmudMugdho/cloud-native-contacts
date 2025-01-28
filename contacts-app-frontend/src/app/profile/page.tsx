@@ -148,6 +148,7 @@ export default function ProfilePage() {
                   src={getImageUrl(user.photoUrl)} 
                   alt={user.name}
                   onError={(e) => {
+                    console.error('Failed to load image:', getImageUrl(user.photoUrl));
                     // If image fails to load, show fallback
                     e.currentTarget.style.display = 'none';
                   }}

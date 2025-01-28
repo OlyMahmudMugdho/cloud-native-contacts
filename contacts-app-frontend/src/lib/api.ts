@@ -143,18 +143,17 @@ export const updateProfilePhoto = async (file: File): Promise<string> => {
 
 export const getImageUrl = (path: string | null | undefined): string | undefined => {
   if (!path) return undefined;
+  
   // If it's already a full URL, return as is
   if (path.startsWith('http')) return path;
-  // If it's a relative path starting with /api/v1, remove that part
-  if (path.startsWith('/api/v1')) {
-    path = path.replace('/api/v1', '');
-  }
+  
   // If it's a relative path starting with /uploads, add the base URL
-  if (path.startsWith('/uploads')) {
+  if (path.startsWith('/uploads/')) {
     return `${API.BASE_URL}${path}`;
   }
-  // For any other relative path, add the base URL and /uploads prefix
-  return `${API.BASE_URL}/uploads${path}`;
+  
+  // For any other path, assume it's a relative path and add base URL and /uploads/
+  return `${API.BASE_URL}/uploads/${path}`;
 };
 
 export default api;
