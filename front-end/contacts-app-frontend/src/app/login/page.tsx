@@ -57,7 +57,7 @@ export default function LoginPage() {
         title: "Success",
         description: "Logged in successfully.",
       })
-      router.push(ROUTES.HOME)
+      router.push(ROUTES.CONTACTS)
     },
     onError: (error: any) => {
       toast({
@@ -70,7 +70,7 @@ export default function LoginPage() {
 
   React.useEffect(() => {
     if (isAuthenticated()) {
-      router.push(ROUTES.HOME)
+      router.push(ROUTES.CONTACTS)
       return
     }
   }, [isAuthenticated, router])

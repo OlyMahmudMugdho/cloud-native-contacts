@@ -45,7 +45,7 @@ export default function RegisterPage() {
 
   React.useEffect(() => {
     if (isAuthenticated()) {
-      router.push(ROUTES.HOME)
+      router.push(ROUTES.CONTACTS)
       return
     }
   }, [isAuthenticated, router])
@@ -68,7 +68,7 @@ export default function RegisterPage() {
         title: "Success",
         description: "Account created successfully.",
       })
-      router.push(ROUTES.HOME)
+      router.push(ROUTES.CONTACTS)
     },
     onError: (error: any) => {
       toast({
