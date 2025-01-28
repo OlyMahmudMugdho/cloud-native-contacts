@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  contacts-app-backend:
+    image: olymahmudmugdho/contacts-app-backend
+    container_name: contacts-app-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://contacts-app-db:5432/contacts_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=mysecretpassword
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - CLOUDINARY_CLOUDNAME=${CLOUDINARY_CLOUDNAME}
+      - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+      - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+      - ALLOWED_ORIGIN=http://contacts-app-frontend:3000
+    volumes:
+      - uploads:/app/uploads
+    networks:
+      - contacts-network
+    depends_on:
+      contacts-app-db:
+        condition: service_healthy
+
+  contacts-app-frontend:
+    image: olymahmudmugdho/contacts-app-frontend
+    container_name: contacts-app-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://contacts-app-backend:8080
+    networks:
+      - contacts-network
+    depends_on:
+      - contacts-app-backend
+
+  contacts-app-db:
+    image: postgres:15-alpine
+    container_name: contacts-app-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=contacts_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mysecretpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - contacts-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  contacts-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  uploads: 

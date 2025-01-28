@@ -9,7 +9,7 @@ export const ROUTES = {
 } as const;
 
 export const API = {
-  BASE_URL: "http://localhost:8080",
+  BASE_URL: "",
   ENDPOINTS: {
     BASE: "/api/v1",
     AUTH: {
