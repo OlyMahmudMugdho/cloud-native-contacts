@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { User, useAuthStore } from '@/store/auth';
+import { API } from './constants';
 
 export interface AuthResponse {
   user: User;
@@ -7,7 +8,7 @@ export interface AuthResponse {
 }
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL: `${API.BASE_URL}${API.ENDPOINTS.BASE}`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -28,10 +29,15 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      // Clear auth state and redirect to login
+      // Clear auth state
       useAuthStore.getState().clearAuth();
+      
+      // Only redirect if we're in the browser
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        // Don't redirect if already on login page
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
       }
     }
     return Promise.reject(error);
@@ -51,12 +57,12 @@ interface RegisterRequest {
 }
 
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/login', data);
+  const response = await api.post<AuthResponse>(API.ENDPOINTS.AUTH.LOGIN, data);
   return response.data;
 };
 
 export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
-  const response = await api.post<AuthResponse>('/auth/register', data);
+  const response = await api.post<AuthResponse>(API.ENDPOINTS.AUTH.REGISTER, data);
   return response.data;
 };
 
@@ -87,35 +93,29 @@ export interface ContactsResponse {
 }
 
 export const getContacts = async (page = 0, size = 10): Promise<ContactsResponse> => {
-  const response = await api.get<ContactsResponse>('/contacts', {
+  const response = await api.get<ContactsResponse>(API.ENDPOINTS.CONTACTS, {
     params: { page, size },
   });
   return response.data;
 };
 
 export const getContact = async (id: string): Promise<Contact> => {
-  const response = await api.get<Contact>(`/contacts/${id}`);
+  const response = await api.get<Contact>(`${API.ENDPOINTS.CONTACTS}/${id}`);
   return response.data;
 };
 
 export const createContact = async (data: CreateContactRequest): Promise<Contact> => {
-  const response = await api.post<Contact>('/contacts', {
-    name: data.name,
-    phoneNumber: data.phoneNumber,
-    email: data.email,
-    address: data.address,
-    description: data.description,
-  });
+  const response = await api.post<Contact>(API.ENDPOINTS.CONTACTS, data);
   return response.data;
 };
 
 export const updateContact = async (id: string, data: Partial<CreateContactRequest>): Promise<Contact> => {
-  const response = await api.put<Contact>(`/contacts/${id}`, data);
+  const response = await api.put<Contact>(`${API.ENDPOINTS.CONTACTS}/${id}`, data);
   return response.data;
 };
 
 export const deleteContact = async (id: string): Promise<void> => {
-  await api.delete(`/contacts/${id}`);
+  await api.delete(`${API.ENDPOINTS.CONTACTS}/${id}`);
 };
 
 export interface UpdateProfileRequest {
@@ -125,7 +125,7 @@ export interface UpdateProfileRequest {
 }
 
 export const updateProfile = async (data: UpdateProfileRequest): Promise<User> => {
-  const response = await api.put<User>('/users/me', data);
+  const response = await api.put<User>(API.ENDPOINTS.USERS.ME, data);
   return response.data;
 };
 
@@ -133,12 +133,28 @@ export const updateProfilePhoto = async (file: File): Promise<string> => {
   const formData = new FormData();
   formData.append('file', file);
   
-  const response = await api.put<string>('/users/me/photo', formData, {
+  const response = await api.put<string>(API.ENDPOINTS.USERS.PHOTO, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
   });
   return response.data;
+};
+
+export const getImageUrl = (path: string | null | undefined): string | undefined => {
+  if (!path) return undefined;
+  // If it's already a full URL, return as is
+  if (path.startsWith('http')) return path;
+  // If it's a relative path starting with /api/v1, remove that part
+  if (path.startsWith('/api/v1')) {
+    path = path.replace('/api/v1', '');
+  }
+  // If it's a relative path starting with /uploads, add the base URL
+  if (path.startsWith('/uploads')) {
+    return `${API.BASE_URL}${path}`;
+  }
+  // For any other relative path, add the base URL and /uploads prefix
+  return `${API.BASE_URL}/uploads${path}`;
 };
 
 export default api;

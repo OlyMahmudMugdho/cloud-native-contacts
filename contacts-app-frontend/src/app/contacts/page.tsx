@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { getContacts } from "@/lib/api"
+import { getContacts, getImageUrl } from "@/lib/api"
 import { useContactsStore } from "@/store/contacts"
 import { useAuthStore } from "@/store/auth"
 import { ContactDialog } from "@/components/contact-dialog"
@@ -31,15 +31,23 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { deleteContact } from "@/lib/api"
+import { ROUTES } from "@/lib/constants"
 
 export default function ContactsPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { user } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore()
   const { contacts, setContacts, currentPage, setCurrentPage, deleteContact: removeContact } = useContactsStore()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
   const [selectedContact, setSelectedContact] = React.useState<string | null>(null)
   const queryClient = useQueryClient()
+
+  React.useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push(ROUTES.LOGIN)
+      return
+    }
+  }, [isAuthenticated, router])
 
   const { isLoading } = useQuery({
     queryKey: ["contacts", currentPage],
@@ -92,11 +100,6 @@ export default function ContactsPage() {
       .toUpperCase()
   }
 
-  if (!user) {
-    router.push("/login")
-    return null
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -121,8 +124,17 @@ export default function ContactsPage() {
             <Card key={contact.id}>
               <CardHeader className="flex flex-row items-center gap-4">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={contact.photoUrl} alt={contact.name} />
-                  <AvatarFallback>{getInitials(contact.name)}</AvatarFallback>
+                  <AvatarImage 
+                    src={getImageUrl(contact.photoUrl)} 
+                    alt={contact.name}
+                    onError={(e) => {
+                      // If image fails to load, show fallback
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <AvatarFallback>
+                    {getInitials(contact.name)}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <CardTitle className="text-xl">{contact.name}</CardTitle>

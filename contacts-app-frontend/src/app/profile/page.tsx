@@ -28,7 +28,8 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useAuthStore } from "@/store/auth"
-import { updateProfile, updateProfilePhoto } from "@/lib/api"
+import { updateProfile, updateProfilePhoto, getImageUrl } from "@/lib/api"
+import { ROUTES } from "@/lib/constants"
 
 const formSchema = z.object({
   username: z.string().min(2, "Username must be at least 2 characters"),
@@ -39,13 +40,14 @@ const formSchema = z.object({
 export default function ProfilePage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { user, setAuth, isAuthenticated } = useAuthStore()
+  const { user, setAuth, isAuthenticated, token } = useAuthStore()
   const [isEditing, setIsEditing] = React.useState(false)
   const queryClient = useQueryClient()
 
   React.useEffect(() => {
     if (!isAuthenticated()) {
-      router.push('/login')
+      router.push(ROUTES.LOGIN)
+      return
     }
   }, [isAuthenticated, router])
 
@@ -61,7 +63,7 @@ export default function ProfilePage() {
   const updateProfileMutation = useMutation({
     mutationFn: updateProfile,
     onSuccess: (updatedUser) => {
-      setAuth(updatedUser, localStorage.getItem("token") || "")
+      setAuth(updatedUser, token || "")
       queryClient.invalidateQueries({ queryKey: ["user"] })
       toast({
         title: "Success",
@@ -82,7 +84,7 @@ export default function ProfilePage() {
     mutationFn: updateProfilePhoto,
     onSuccess: (photoUrl) => {
       if (user) {
-        setAuth({ ...user, photoUrl }, localStorage.getItem("token") || "")
+        setAuth({ ...user, photoUrl }, token || "")
         queryClient.invalidateQueries({ queryKey: ["user"] })
       }
       toast({
@@ -110,10 +112,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (!user) {
-    router.push("/login")
-    return null
-  }
+  if (!user) return null;
 
   const getInitials = (name: string) => {
     return name
@@ -145,12 +144,22 @@ export default function ProfilePage() {
           <div className="flex flex-col items-center space-y-4">
             <div className="relative">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={user.photoUrl || undefined} alt={user.name} />
-                <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
+                <AvatarImage 
+                  src={getImageUrl(user.photoUrl)} 
+                  alt={user.name}
+                  onError={(e) => {
+                    // If image fails to load, show fallback
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+                <AvatarFallback>
+                  {getInitials(user.name)}
+                </AvatarFallback>
               </Avatar>
               <label
                 htmlFor="photo"
-                className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
+                className="absolute bottom-0 right-0 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                title="Change profile photo"
               >
                 <Pencil className="h-3 w-3" />
                 <input
