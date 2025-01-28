@@ -31,7 +31,16 @@ spring:
     resources:
       static-locations:
         - classpath:/static/
+        - classpath:/public/
+        - classpath:/META-INF/resources/
         - file:uploads/
+      chain:
+        strategy:
+          content:
+            enabled: true
+            paths: /**
+      cache:
+        period: 3600
       add-mappings: true
   mvc:
     throw-exception-if-no-handler-found: true

@@ -36,14 +36,28 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
+                // Root and index
                 .requestMatchers("/").permitAll()
                 .requestMatchers("/index.html").permitAll()
-                .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.json").permitAll()
+                // Next.js static files
+                .requestMatchers("/_next/**").permitAll()
                 .requestMatchers("/static/**").permitAll()
                 .requestMatchers("/assets/**").permitAll()
+                // Common static files
+                .requestMatchers("/*.js", "/*.css", "/*.ico", "/*.json").permitAll()
+                .requestMatchers("/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.svg").permitAll()
+                .requestMatchers("/favicon.ico").permitAll()
+                .requestMatchers("/manifest.json").permitAll()
+                .requestMatchers("/robots.txt").permitAll()
+                // Font files
+                .requestMatchers("/*.woff", "/*.woff2", "/*.ttf", "/*.eot").permitAll()
+                // API endpoints
                 .requestMatchers("/api/v1/auth/**").permitAll()
+                // Uploaded files
                 .requestMatchers("/uploads/**").permitAll()
+                // Error pages
                 .requestMatchers("/error").permitAll()
+                // Any other request needs authentication
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
