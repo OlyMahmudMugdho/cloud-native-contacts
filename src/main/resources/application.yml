@@ -29,10 +29,7 @@ spring:
   # Static resource handling
   mvc:
     static-path-pattern: /uploads/**
-  
-  web:
-    resources:
-      static-locations: file:${app.upload.dir}/
+
   
   # Email Configuration
   mail:
@@ -56,8 +53,6 @@ app:
   jwt:
     secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
     expiration: 86400000 # 24 hours in milliseconds
-  upload:
-    dir: ${user.dir}/uploads
 
 # CORS Configuration
 management:
@@ -83,3 +78,9 @@ logging:
       springframework:
         web: DEBUG
         web.servlet.resource: TRACE 
+
+# Cloudinary Configuration
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUDNAME} 
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}

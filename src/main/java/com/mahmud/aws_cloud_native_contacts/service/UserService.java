@@ -1,5 +1,7 @@
 package com.mahmud.aws_cloud_native_contacts.service;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.mahmud.aws_cloud_native_contacts.dto.UserDTO;
 import com.mahmud.aws_cloud_native_contacts.entity.User;
 import com.mahmud.aws_cloud_native_contacts.repository.UserRepository;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -27,6 +30,8 @@ public class UserService {
     private final UserRepository userRepository;
     @Autowired
     private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private final Cloudinary cloudinary;
 
     public UserDTO getCurrentUser() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -49,6 +54,24 @@ public class UserService {
         return mapToDTO(userRepository.save(currentUser));
     }
 
+
+    @Transactional
+    public String updateProfilePicture(MultipartFile file) throws IOException {
+        User user = getCurrentUserEntity();
+
+        // Upload image to Cloudinary
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+
+        // Retrieve the URL of the uploaded image
+        String photoUrl = (String) uploadResult.get("url");
+
+        // Save the image URL in the database
+        user.setPhotoUrl(photoUrl);
+        userRepository.save(user);
+
+        return photoUrl;
+    }
+/* 
     @Transactional
     public String updateProfilePicture(MultipartFile file) throws IOException {
         User user = getCurrentUserEntity();
@@ -67,7 +90,7 @@ public class UserService {
         userRepository.save(user);
         
         return photoUrl;
-    }
+    } */
 
     public User getCurrentUserEntity() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
