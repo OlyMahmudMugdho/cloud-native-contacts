@@ -36,9 +36,17 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(auth -> auth
-                // Root and index
-                .requestMatchers("/").permitAll()
-                .requestMatchers("/index.html").permitAll()
+                // Frontend routes
+                .requestMatchers(
+                    "/",
+                    "/login",
+                    "/register",
+                    "/profile",
+                    "/contacts",
+                    "/forgot-password",
+                    "/reset-password",
+                    "/index.html"
+                ).permitAll()
                 // Next.js static files
                 .requestMatchers("/_next/**").permitAll()
                 .requestMatchers("/static/**").permitAll()
@@ -57,8 +65,10 @@ public class SecurityConfig {
                 .requestMatchers("/uploads/**").permitAll()
                 // Error pages
                 .requestMatchers("/error").permitAll()
-                // Any other request needs authentication
-                .anyRequest().authenticated()
+                // API endpoints that require authentication
+                .requestMatchers("/api/**").authenticated()
+                // Allow all other requests for frontend routing
+                .anyRequest().permitAll()
             )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
