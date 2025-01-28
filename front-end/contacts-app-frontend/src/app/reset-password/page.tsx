@@ -83,17 +83,17 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Reset Password</CardTitle>
-          <CardDescription>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-[400px]">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl md:text-2xl text-center">Reset Password</CardTitle>
+          <CardDescription className="text-center">
             Enter your new password
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
               <FormField
                 control={form.control}
                 name="token"
@@ -101,7 +101,7 @@ function ResetPasswordForm() {
                   <FormItem>
                     <FormLabel>Reset Token</FormLabel>
                     <FormControl>
-                      <Input {...field} readOnly={!!searchParams.get("token")} />
+                      <Input {...field} className="w-full" readOnly={!!searchParams.get("token")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -114,7 +114,7 @@ function ResetPasswordForm() {
                   <FormItem>
                     <FormLabel>New Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" {...field} className="w-full" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,7 +127,7 @@ function ResetPasswordForm() {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" {...field} className="w-full" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -135,7 +135,7 @@ function ResetPasswordForm() {
               />
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full mt-4"
                 disabled={resetPasswordMutation.isPending}
               >
                 {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
@@ -143,7 +143,7 @@ function ResetPasswordForm() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex justify-center border-t px-4 py-4">
           <p className="text-sm text-muted-foreground">
             Remember your password?{" "}
             <Link href="/login" className="text-primary hover:underline">
@@ -158,7 +158,11 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <React.Suspense fallback={<div>Loading...</div>}>
+    <React.Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="text-center">Loading...</div>
+      </div>
+    }>
       <ResetPasswordForm />
     </React.Suspense>
   )

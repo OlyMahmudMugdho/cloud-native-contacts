@@ -68,17 +68,17 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
-      <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Forgot Password</CardTitle>
-          <CardDescription>
+    <div className="flex min-h-screen items-center justify-center p-4">
+      <Card className="w-full max-w-[400px]">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl md:text-2xl text-center">Forgot Password</CardTitle>
+          <CardDescription className="text-center">
             Enter your email address and we&apos;ll send you instructions to reset your password
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
               <FormField
                 control={form.control}
                 name="email"
@@ -86,7 +86,7 @@ export default function ForgotPasswordPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" {...field} />
+                      <Input type="email" {...field} className="w-full" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
               />
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full mt-4"
                 disabled={forgotPasswordMutation.isPending}
               >
                 {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Instructions"}
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2 text-center">
+        <CardFooter className="flex flex-col space-y-2 text-center border-t px-4 py-4">
           <p className="text-sm text-muted-foreground">
             Remember your password?{" "}
             <Link href="/login" className="text-primary hover:underline">
