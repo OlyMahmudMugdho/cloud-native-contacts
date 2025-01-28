@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -27,70 +27,68 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
-import { login } from "@/lib/api"
-import { useAuthStore } from "@/store/auth"
+import { resetPassword } from "@/lib/api"
 import { ROUTES } from "@/lib/constants"
 
 const formSchema = z.object({
-  username: z.string().min(2, "Username must be at least 2 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-})
+  token: z.string().min(1, "Token is required"),
+  newPassword: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .max(50, "Password must not exceed 50 characters"),
+  confirmPassword: z.string()
+    .min(6, "Password must be at least 6 characters")
+    .max(50, "Password must not exceed 50 characters"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
-export default function LoginPage() {
+export default function ResetPasswordPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { toast } = useToast()
-  const { setAuth, isAuthenticated } = useAuthStore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      token: searchParams.get("token") || "",
+      newPassword: "",
+      confirmPassword: "",
     },
   })
 
-  const loginMutation = useMutation({
-    mutationFn: login,
-    onSuccess: (data) => {
-      setAuth(data.user, data.token)
+  const resetPasswordMutation = useMutation({
+    mutationFn: (data: z.infer<typeof formSchema>) => {
+      const { confirmPassword, ...resetData } = data;
+      return resetPassword(resetData);
+    },
+    onSuccess: () => {
       toast({
         title: "Success",
-        description: "Logged in successfully.",
+        description: "Your password has been reset successfully.",
       })
-      router.push(ROUTES.HOME)
+      router.push(ROUTES.LOGIN)
     },
     onError: (error: any) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.response?.data?.message || "Invalid credentials.",
+        description: error.response?.data?.message || "Failed to reset password. Please try again.",
       })
     },
   })
 
-  React.useEffect(() => {
-    if (isAuthenticated()) {
-      router.push(ROUTES.HOME)
-      return
-    }
-  }, [isAuthenticated, router])
-
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    loginMutation.mutate(data)
-  }
-
-  // If authenticated, don't render the login form
-  if (isAuthenticated()) {
-    return null
+    resetPasswordMutation.mutate(data)
   }
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>Reset Password</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account
+            Enter your new password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -98,12 +96,12 @@ export default function LoginPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="username"
+                name="token"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Reset Token</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} readOnly={!!searchParams.get("token")} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -111,42 +109,49 @@ export default function LoginPage() {
               />
               <FormField
                 control={form.control}
-                name="password"
+                name="newPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>New Password</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
                     <FormMessage />
-                    <div className="text-sm text-right">
-                      <Link href={ROUTES.FORGOT_PASSWORD} className="text-primary hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loginMutation.isPending}
+                disabled={resetPasswordMutation.isPending}
               >
-                {loginMutation.isPending ? "Logging in..." : "Login"}
+                {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="flex justify-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-primary hover:underline">
-              Register
+            Remember your password?{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Login
             </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
   )
-}
-  
+} 

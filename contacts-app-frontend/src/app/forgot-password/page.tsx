@@ -27,70 +27,53 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
-import { login } from "@/lib/api"
-import { useAuthStore } from "@/store/auth"
+import { forgotPassword } from "@/lib/api"
 import { ROUTES } from "@/lib/constants"
 
 const formSchema = z.object({
-  username: z.string().min(2, "Username must be at least 2 characters"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Please enter a valid email address"),
 })
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { setAuth, isAuthenticated } = useAuthStore()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
-      password: "",
+      email: "",
     },
   })
 
-  const loginMutation = useMutation({
-    mutationFn: login,
-    onSuccess: (data) => {
-      setAuth(data.user, data.token)
+  const forgotPasswordMutation = useMutation({
+    mutationFn: forgotPassword,
+    onSuccess: () => {
       toast({
         title: "Success",
-        description: "Logged in successfully.",
+        description: "If an account exists with this email, you will receive password reset instructions.",
       })
-      router.push(ROUTES.HOME)
+      router.push(ROUTES.LOGIN)
     },
     onError: (error: any) => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.response?.data?.message || "Invalid credentials.",
+        description: error.response?.data?.message || "Something went wrong. Please try again.",
       })
     },
   })
 
-  React.useEffect(() => {
-    if (isAuthenticated()) {
-      router.push(ROUTES.HOME)
-      return
-    }
-  }, [isAuthenticated, router])
-
   const onSubmit = (data: z.infer<typeof formSchema>) => {
-    loginMutation.mutate(data)
-  }
-
-  // If authenticated, don't render the login form
-  if (isAuthenticated()) {
-    return null
+    forgotPasswordMutation.mutate(data)
   }
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <Card className="w-[350px]">
         <CardHeader>
-          <CardTitle>Login</CardTitle>
+          <CardTitle>Forgot Password</CardTitle>
           <CardDescription>
-            Enter your credentials to access your account
+            Enter your email address and we'll send you instructions to reset your password
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -98,55 +81,42 @@ export default function LoginPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="username"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input type="email" {...field} />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    <div className="text-sm text-right">
-                      <Link href={ROUTES.FORGOT_PASSWORD} className="text-primary hover:underline">
-                        Forgot password?
-                      </Link>
-                    </div>
                   </FormItem>
                 )}
               />
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loginMutation.isPending}
+                disabled={forgotPasswordMutation.isPending}
               >
-                {loginMutation.isPending ? "Logging in..." : "Login"}
+                {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Instructions"}
               </Button>
             </form>
           </Form>
         </CardContent>
-        <CardFooter className="flex justify-center">
+        <CardFooter className="flex flex-col space-y-2 text-center">
           <p className="text-sm text-muted-foreground">
-            Don&apos;t have an account?{" "}
-            <Link href="/register" className="text-primary hover:underline">
-              Register
+            Remember your password?{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Login
+            </Link>
+          </p>
+          <p className="text-sm text-muted-foreground">
+            Already have a reset token?{" "}
+            <Link href={ROUTES.RESET_PASSWORD} className="text-primary hover:underline">
+              Reset your password
             </Link>
           </p>
         </CardFooter>
       </Card>
     </div>
   )
-}
-  
+} 

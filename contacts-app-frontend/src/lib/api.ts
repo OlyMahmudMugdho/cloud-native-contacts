@@ -151,4 +151,21 @@ export const getImageUrl = (path: string | null | undefined): string | undefined
   return `${API.BASE_URL}${path}`;
 };
 
+interface ForgotPasswordRequest {
+  email: string;
+}
+
+export const forgotPassword = async (data: ForgotPasswordRequest): Promise<void> => {
+  await api.post(API.ENDPOINTS.AUTH.FORGOT_PASSWORD, data);
+};
+
+interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+export const resetPassword = async (data: ResetPasswordRequest): Promise<void> => {
+  await api.post(API.ENDPOINTS.AUTH.RESET_PASSWORD, data);
+};
+
 export default api;

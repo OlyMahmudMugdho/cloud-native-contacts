@@ -4,6 +4,8 @@ export const ROUTES = {
   REGISTER: "/register",
   PROFILE: "/profile",
   CONTACTS: "/contacts",
+  FORGOT_PASSWORD: "/forgot-password",
+  RESET_PASSWORD: "/reset-password",
 } as const;
 
 export const API = {
@@ -13,6 +15,8 @@ export const API = {
     AUTH: {
       LOGIN: "/auth/login",
       REGISTER: "/auth/register",
+      FORGOT_PASSWORD: "/auth/forgot-password",
+      RESET_PASSWORD: "/auth/reset-password",
     },
     USERS: {
       ME: "/users/me",
