@@ -36,6 +36,7 @@ import { ROUTES } from "@/lib/constants"
 export default function ContactsPage() {
   const router = useRouter()
   const { toast } = useToast()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { user, isAuthenticated } = useAuthStore()
   const { contacts, setContacts, currentPage, setCurrentPage, deleteContact: removeContact } = useContactsStore()
   const [isDialogOpen, setIsDialogOpen] = React.useState(false)
