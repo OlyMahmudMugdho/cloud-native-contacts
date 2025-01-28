@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { User } from '@/store/auth';
+import { User, useAuthStore } from '@/store/auth';
 
 export interface AuthResponse {
   user: User;
@@ -15,15 +15,28 @@ const api = axios.create({
 
 // Request interceptor to add auth token
 api.interceptors.request.use((config) => {
-  const authData = localStorage.getItem('auth-storage')
-    ? JSON.parse(localStorage.getItem('auth-storage')!)
-    : null;
+  const token = useAuthStore.getState().token;
   
-  if (authData?.state?.token) {
-    config.headers.Authorization = `Bearer ${authData.state.token}`;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+// Response interceptor to handle unauthorized responses
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // Clear auth state and redirect to login
+      useAuthStore.getState().clearAuth();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 interface LoginRequest {
   username: string;
@@ -103,6 +116,29 @@ export const updateContact = async (id: string, data: Partial<CreateContactReque
 
 export const deleteContact = async (id: string): Promise<void> => {
   await api.delete(`/contacts/${id}`);
+};
+
+export interface UpdateProfileRequest {
+  username: string;
+  name: string;
+  email: string;
+}
+
+export const updateProfile = async (data: UpdateProfileRequest): Promise<User> => {
+  const response = await api.put<User>('/users/me', data);
+  return response.data;
+};
+
+export const updateProfilePhoto = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const response = await api.put<string>('/users/me/photo', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return response.data;
 };
 
 export default api;

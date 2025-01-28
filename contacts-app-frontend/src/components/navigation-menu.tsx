@@ -68,6 +68,9 @@ export function NavigationMenu() {
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push("/profile")}>
+                  Profile
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
