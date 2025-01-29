@@ -49,8 +49,17 @@ export default function ContactsPage() {
     }
   }, [isAuthenticated, router])
 
+  // Clear contacts when component unmounts (e.g., on logout)
+  React.useEffect(() => {
+    return () => {
+      setContacts([], 0)
+      // Also clear the query cache for this user
+      queryClient.removeQueries({ queryKey: ["contacts"] })
+    }
+  }, [setContacts, queryClient])
+
   const { isLoading } = useQuery({
-    queryKey: ["contacts", currentPage],
+    queryKey: ["contacts", currentPage, user?.username], // Add username to query key
     queryFn: async () => {
       try {
         const data = await getContacts(currentPage)
@@ -66,6 +75,10 @@ export default function ContactsPage() {
         throw error
       }
     },
+    staleTime: 0, // Consider data stale immediately
+    gcTime: 0,    // Don't keep the cache
+    refetchOnWindowFocus: false, // Don't refetch on window focus
+    refetchOnMount: true // Always refetch on mount
   })
 
   const deleteMutation = useMutation({

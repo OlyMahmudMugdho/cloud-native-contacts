@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { User, useAuthStore } from '@/store/auth';
+import { useAuthStore } from '@/store/auth';
+import { User } from '@/types';
 import { API } from './constants';
 
 export interface AuthResponse {

@@ -27,6 +27,7 @@ public class ContactService {
 
     public Page<ContactDTO> getAllContacts(Pageable pageable) {
         User currentUser = userService.getCurrentUserEntity();
+        System.out.println(currentUser.getUsername());
         return contactRepository.findByUser(currentUser, pageable)
                 .map(this::mapToDTO);
     }

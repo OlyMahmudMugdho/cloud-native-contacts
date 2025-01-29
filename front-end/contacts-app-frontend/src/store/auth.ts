@@ -1,13 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-export interface User {
-  id: string;
-  username: string;
-  name: string;
-  email: string;
-  photoUrl?: string;
-}
+import type { User } from '@/types';
+import { useContactsStore } from './contacts';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AuthState {
   token: string | null;
@@ -20,22 +15,24 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      token: null,
       user: null,
-      setAuth: (user, token) => set({ token, user }),
-      clearAuth: () => set({ token: null, user: null }),
+      token: null,
+      setAuth: (user, token) => set({ user, token }),
+      clearAuth: () => {
+        // Clear contacts from the contacts store
+        const contactsStore = useContactsStore.getState();
+        contactsStore.clearContacts();
+        
+        // Clear auth state
+        set({ user: null, token: null });
+      },
       isAuthenticated: () => {
         const state = get();
-        return !!(state.token && state.user);
+        return !!state.token && !!state.user;
       },
     }),
     {
       name: 'auth-storage',
-      // Only persist token and user
-      partialize: (state) => ({
-        token: state.token,
-        user: state.user,
-      }),
     }
   )
 ); 

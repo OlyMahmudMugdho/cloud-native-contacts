@@ -35,6 +35,17 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            // Add security headers
+            .headers(headers -> {
+                headers.cacheControl(cache -> cache.disable());
+                headers.frameOptions(frame -> frame.deny());
+                headers.httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .preload(true)
+                    .maxAgeInSeconds(31536000));
+                headers.xssProtection(xss -> {});
+                headers.contentTypeOptions(contentType -> {});
+            })
             .authorizeHttpRequests(auth -> auth
                 // Frontend routes
                 .requestMatchers(
