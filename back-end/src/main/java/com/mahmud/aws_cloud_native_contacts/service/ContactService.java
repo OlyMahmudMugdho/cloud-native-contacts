@@ -11,11 +11,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ezvcard.Ezvcard;
+import ezvcard.VCard;
+import ezvcard.VCardVersion;
+import ezvcard.property.StructuredName;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -101,6 +106,49 @@ public class ContactService {
         contactRepository.save(contact);
         
         return photoUrl;
+    }
+
+    public byte[] exportContactsToVcf() {
+        User currentUser = userService.getCurrentUserEntity();
+        List<Contact> contacts = contactRepository.findByUser(currentUser);
+        
+        List<VCard> vCards = contacts.stream().map(contact -> {
+            VCard vCard = new VCard();
+            
+            // Set full name
+            vCard.setFormattedName(contact.getName());
+            
+            // Set structured name
+            StructuredName n = new StructuredName();
+            n.setGiven(contact.getName());
+            vCard.setStructuredName(n);
+            
+            // Set phone number
+            vCard.addTelephoneNumber(contact.getPhoneNumber());
+            
+            // Set email if available
+            if (contact.getEmail() != null) {
+                vCard.addEmail(contact.getEmail());
+            }
+            
+            // Set address if available
+            if (contact.getAddress() != null) {
+                ezvcard.property.Address address = new ezvcard.property.Address();
+                address.setStreetAddress(contact.getAddress());
+                vCard.addAddress(address);
+            }
+            
+            // Set note/description if available
+            if (contact.getDescription() != null) {
+                vCard.addNote(contact.getDescription());
+            }
+            
+            
+            return vCard;
+        }).toList();
+        
+        // Write all vCards to a string
+        return Ezvcard.write(vCards).version(VCardVersion.V4_0).go().getBytes();
     }
 
     private ContactDTO mapToDTO(Contact contact) {

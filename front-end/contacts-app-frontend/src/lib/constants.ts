@@ -23,5 +23,6 @@ export const API = {
       PHOTO: "/users/me/photo",
     },
     CONTACTS: "/contacts",
+    CONTACTS_EXPORT: "/contacts/export/vcf",
   },
 } as const; 

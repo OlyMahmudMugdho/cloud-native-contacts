@@ -48,6 +48,14 @@ public class ContactController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping(value = "/export/vcf", produces = "text/vcard")
+    public ResponseEntity<byte[]> exportContactsToVcf() {
+        byte[] vcfData = contactService.exportContactsToVcf();
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"contacts.vcf\"")
+                .body(vcfData);
+    }
+
     @PutMapping(value = "/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> updateContactPhoto(
             @PathVariable Long id,

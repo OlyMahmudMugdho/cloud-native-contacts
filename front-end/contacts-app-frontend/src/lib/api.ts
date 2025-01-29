@@ -169,4 +169,11 @@ export const resetPassword = async (data: ResetPasswordRequest): Promise<void> =
   await api.post(API.ENDPOINTS.AUTH.RESET_PASSWORD, data);
 };
 
+export const exportContactsToVcf = async (): Promise<Blob> => {
+  const response = await api.get(API.ENDPOINTS.CONTACTS_EXPORT, {
+    responseType: 'blob'
+  });
+  return response.data;
+};
+
 export default api;

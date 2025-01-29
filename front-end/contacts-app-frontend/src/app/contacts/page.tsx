@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { getContacts, getImageUrl } from "@/lib/api"
+import { getContacts, getImageUrl, exportContactsToVcf } from "@/lib/api"
 import { useContactsStore } from "@/store/contacts"
 import { useAuthStore } from "@/store/auth"
 import { ContactDialog } from "@/components/contact-dialog"
@@ -113,16 +113,47 @@ export default function ContactsPage() {
       .toUpperCase()
   }
 
+  const handleExport = async () => {
+    try {
+      const blob = await exportContactsToVcf();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'contacts.vcf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({
+        title: "Success",
+        description: "Contacts exported successfully.",
+      });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Failed to export contacts.";
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: errorMessage,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Contacts</h1>
-        <Button onClick={() => {
-          setSelectedContact(null)
-          setIsDialogOpen(true)
-        }}>
-          Add Contact
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleExport}>
+            Export Contacts
+          </Button>
+          <Button onClick={() => {
+            setSelectedContact(null)
+            setIsDialogOpen(true)
+          }}>
+            Add Contact
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
