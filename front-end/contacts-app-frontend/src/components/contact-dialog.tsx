@@ -29,10 +29,10 @@ import { useToast } from "./ui/use-toast"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email address").optional().or(z.literal("")).default(""),
   phoneNumber: z.string().min(10, "Phone number must be at least 10 characters"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  description: z.string().optional(),
+  address: z.string().min(5, "Address must be at least 5 characters").optional().or(z.literal("")).default(""),
+  description: z.any()
 })
 
 interface ContactDialogProps {
@@ -120,10 +120,18 @@ export function ContactDialog({
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const requestData: CreateContactRequest = {
+      name: values.name,
+      phoneNumber: values.phoneNumber,
+      email: values.email || null,
+      address: values.address || null,
+      description: values.description || null
+    };
+    
     if (contactId) {
-      updateMutation.mutate(values)
+      updateMutation.mutate(requestData)
     } else {
-      createMutation.mutate(values)
+      createMutation.mutate(requestData)
     }
   }
 

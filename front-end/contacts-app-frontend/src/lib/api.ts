@@ -79,10 +79,10 @@ export interface Contact {
 
 export interface CreateContactRequest {
   name: string;
-  email: string;
+  email?: string | null;
   phoneNumber: string;
-  address: string;
-  description?: string;
+  address?: string | null;
+  description?: any;
 }
 
 export interface ContactsResponse {

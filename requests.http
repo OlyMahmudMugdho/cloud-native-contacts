@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:8080
-@authToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlciIsImlhdCI6MTczNzk5NTE5NywiZXhwIjoxNzM4MDgxNTk3fQ.oPth5VlZXfK1Z5Jcb0zn5bcuCiYoq2WwBALJDS1MMzs
+@authToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtdWdkaG8iLCJpYXQiOjE3MzgxNDg0ODAsImV4cCI6MTczODIzNDg4MH0.Ki7lDAEnzYppnj1mKPsa0XiLiu7Uq1C6540O_NmYc34
 @profileImageUrl = https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80
 @contactImageUrl = https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80
 
@@ -20,8 +20,8 @@ POST {{baseUrl}}/api/v1/auth/login
 Content-Type: application/json
 
 {
-    "username": "testuser",
-    "password": "password123"
+    "username": "mugdho",
+    "password": "mugdho"
 }
 
 ### Forgot Password
@@ -97,7 +97,6 @@ Content-Type: application/json
     "name": "John Doe Updated",
     "phoneNumber": "+1234567890",
     "email": "john.updated@example.com",
-    "description": "Work colleague - Team Lead",
     "address": "456 New St, City"
 }
 
