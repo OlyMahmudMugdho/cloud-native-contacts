@@ -140,14 +140,14 @@ export default function ContactsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Contacts</h1>
-        <div className="flex gap-2">
-          <Button onClick={handleExport}>
+    <div className="space-y-6 p-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold">Contacts</h1>
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <Button className="flex-1 sm:flex-none" onClick={handleExport}>
             Export Contacts
           </Button>
-          <Button onClick={() => {
+          <Button className="flex-1 sm:flex-none" onClick={() => {
             setSelectedContact(null)
             setIsDialogOpen(true)
           }}>
@@ -163,11 +163,11 @@ export default function ContactsPage() {
           No contacts found. Add your first contact to get started.
         </div>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {contacts.map((contact) => (
-            <Card key={contact.id}>
+            <Card key={contact.id} className="max-w-full overflow-hidden">
               <CardHeader className="flex flex-row items-center gap-4">
-                <Avatar className="h-12 w-12">
+                <Avatar className="h-12 w-12 flex-shrink-0">
                   <AvatarImage 
                     src={getImageUrl(contact.photoUrl)} 
                     alt={contact.name}
@@ -180,28 +180,28 @@ export default function ContactsPage() {
                     {getInitials(contact.name)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex-1">
-                  <CardTitle className="text-xl">{contact.name}</CardTitle>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-xl truncate">{contact.name}</CardTitle>
                   {contact.description && (
-                    <CardDescription>{contact.description}</CardDescription>
+                    <CardDescription className="truncate">{contact.description}</CardDescription>
                   )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
-                  <Phone className="h-4 w-4" />
-                  <span>{contact.phoneNumber}</span>
+                  <Phone className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{contact.phoneNumber}</span>
                 </div>
                 {contact.email && (
                   <div className="flex items-center gap-2 text-sm">
-                    <Mail className="h-4 w-4" />
-                    <span>{contact.email}</span>
+                    <Mail className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{contact.email}</span>
                   </div>
                 )}
                 {contact.address && (
                   <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="h-4 w-4" />
-                    <span>{contact.address}</span>
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{contact.address}</span>
                   </div>
                 )}
               </CardContent>
@@ -222,7 +222,7 @@ export default function ContactsPage() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="sm:max-w-[425px]">
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Contact</AlertDialogTitle>
                       <AlertDialogDescription>

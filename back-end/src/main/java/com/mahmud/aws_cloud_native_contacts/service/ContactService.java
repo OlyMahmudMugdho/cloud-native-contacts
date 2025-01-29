@@ -118,37 +118,49 @@ public class ContactService {
             // Set full name
             vCard.setFormattedName(contact.getName());
             
-            // Set structured name
+            // Set structured name (split into parts if possible)
+            String[] nameParts = contact.getName().split(" ", 2);
             StructuredName n = new StructuredName();
-            n.setGiven(contact.getName());
+            if (nameParts.length > 1) {
+                n.setGiven(nameParts[0]);
+                n.setFamily(nameParts[1]);
+            } else {
+                n.setGiven(contact.getName());
+            }
             vCard.setStructuredName(n);
             
-            // Set phone number
-            vCard.addTelephoneNumber(contact.getPhoneNumber());
+            // Set phone number with type CELL
+            ezvcard.property.Telephone tel = new ezvcard.property.Telephone(contact.getPhoneNumber());
+            tel.getTypes().add(ezvcard.parameter.TelephoneType.CELL);
+            vCard.addTelephoneNumber(tel);
             
             // Set email if available
-            if (contact.getEmail() != null) {
+            if (contact.getEmail() != null && !contact.getEmail().isEmpty()) {
                 vCard.addEmail(contact.getEmail());
             }
             
             // Set address if available
-            if (contact.getAddress() != null) {
+            if (contact.getAddress() != null && !contact.getAddress().isEmpty()) {
                 ezvcard.property.Address address = new ezvcard.property.Address();
+                address.setLabel(contact.getAddress());
                 address.setStreetAddress(contact.getAddress());
                 vCard.addAddress(address);
             }
             
             // Set note/description if available
-            if (contact.getDescription() != null) {
+            if (contact.getDescription() != null && !contact.getDescription().isEmpty()) {
                 vCard.addNote(contact.getDescription());
             }
-            
             
             return vCard;
         }).toList();
         
-        // Write all vCards to a string
-        return Ezvcard.write(vCards).version(VCardVersion.V4_0).go().getBytes();
+        // Write all vCards to a string using version 3.0 (more widely supported)
+        return Ezvcard.write(vCards)
+                .version(VCardVersion.V3_0)
+                .caretEncoding(true)  // Use ^ encoding for special characters
+                .go()
+                .getBytes();
     }
 
     private ContactDTO mapToDTO(Contact contact) {

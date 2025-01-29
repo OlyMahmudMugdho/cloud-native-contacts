@@ -48,11 +48,13 @@ public class ContactController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping(value = "/export/vcf", produces = "text/vcard")
+    @GetMapping(value = "/export/vcf", produces = "text/x-vcard;charset=UTF-8")
     public ResponseEntity<byte[]> exportContactsToVcf() {
         byte[] vcfData = contactService.exportContactsToVcf();
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=\"contacts.vcf\"")
+                .header("Content-Type", "text/x-vcard; charset=UTF-8")
+                .contentLength(vcfData.length)
                 .body(vcfData);
     }
 
