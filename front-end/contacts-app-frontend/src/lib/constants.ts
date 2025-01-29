@@ -24,5 +24,6 @@ export const API = {
     },
     CONTACTS: "/contacts",
     CONTACTS_EXPORT: "/contacts/export/vcf",
+    CONTACTS_IMPORT: "/contacts/import/vcf",
   },
 } as const; 

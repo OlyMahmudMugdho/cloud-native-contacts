@@ -163,6 +163,75 @@ public class ContactService {
                 .getBytes();
     }
 
+    @Transactional
+    public void importContactsFromVcf(MultipartFile file) throws IOException {
+        User currentUser = userService.getCurrentUserEntity();
+        List<VCard> vCards = Ezvcard.parse(file.getInputStream()).all();
+        
+        for (VCard vCard : vCards) {
+            // Get name from FormattedName or StructuredName
+            String name;
+            if (vCard.getFormattedName() != null) {
+                name = vCard.getFormattedName().getValue();
+            } else if (vCard.getStructuredName() != null) {
+                StructuredName sn = vCard.getStructuredName();
+                name = String.join(" ", 
+                    sn.getGiven() != null ? sn.getGiven() : "",
+                    sn.getFamily() != null ? sn.getFamily() : ""
+                ).trim();
+            } else {
+                // Skip if no name is available
+                continue;
+            }
+            
+            // Get first phone number
+            String phoneNumber = null;
+            if (!vCard.getTelephoneNumbers().isEmpty()) {
+                phoneNumber = vCard.getTelephoneNumbers().get(0).getText();
+            }
+            
+            // Skip if no phone number is available
+            if (phoneNumber == null || phoneNumber.isEmpty()) {
+                continue;
+            }
+            
+            // Get first email
+            String email = null;
+            if (!vCard.getEmails().isEmpty()) {
+                email = vCard.getEmails().get(0).getValue();
+            }
+            
+            // Get first address
+            String address = null;
+            if (!vCard.getAddresses().isEmpty()) {
+                ezvcard.property.Address addr = vCard.getAddresses().get(0);
+                if (addr.getLabel() != null) {
+                    address = addr.getLabel();
+                } else if (addr.getStreetAddress() != null) {
+                    address = addr.getStreetAddress();
+                }
+            }
+            
+            // Get first note as description
+            String description = null;
+            if (!vCard.getNotes().isEmpty()) {
+                description = vCard.getNotes().get(0).getValue();
+            }
+            
+            // Create and save the contact
+            Contact contact = Contact.builder()
+                    .name(name)
+                    .phoneNumber(phoneNumber)
+                    .email(email)
+                    .address(address)
+                    .description(description)
+                    .user(currentUser)
+                    .build();
+            
+            contactRepository.save(contact);
+        }
+    }
+
     private ContactDTO mapToDTO(Contact contact) {
         return ContactDTO.builder()
                 .id(contact.getId())

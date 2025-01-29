@@ -176,4 +176,14 @@ export const exportContactsToVcf = async (): Promise<Blob> => {
   return response.data;
 };
 
+export const importContactsFromVcf = async (file: File): Promise<void> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  await api.post(API.ENDPOINTS.CONTACTS_IMPORT, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
 export default api;

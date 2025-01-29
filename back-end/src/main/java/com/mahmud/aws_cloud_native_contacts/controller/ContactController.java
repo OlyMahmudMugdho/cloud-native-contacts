@@ -65,4 +65,10 @@ public class ContactController {
         String photoUrl = contactService.updateContactPhoto(id, file);
         return ResponseEntity.ok(photoUrl);
     }
+
+    @PostMapping(value = "/import/vcf", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> importContactsFromVcf(@RequestParam("file") MultipartFile file) throws IOException {
+        contactService.importContactsFromVcf(file);
+        return ResponseEntity.ok().build();
+    }
 } 

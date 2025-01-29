@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/use-toast"
-import { getContacts, getImageUrl, exportContactsToVcf } from "@/lib/api"
+import { getContacts, getImageUrl, exportContactsToVcf, importContactsFromVcf } from "@/lib/api"
 import { useContactsStore } from "@/store/contacts"
 import { useAuthStore } from "@/store/auth"
 import { ContactDialog } from "@/components/contact-dialog"
@@ -139,11 +139,51 @@ export default function ContactsPage() {
     }
   };
 
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      await importContactsFromVcf(file);
+      // Refresh contacts list
+      queryClient.invalidateQueries({ queryKey: ["contacts"] });
+      
+      toast({
+        title: "Success",
+        description: "Contacts imported successfully.",
+      });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || "Failed to import contacts.";
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: errorMessage,
+      });
+    } finally {
+      // Reset the file input
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="space-y-6 p-4">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h1 className="text-2xl sm:text-3xl font-bold">Contacts</h1>
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+          <input
+            type="file"
+            accept=".vcf"
+            onChange={handleImport}
+            className="hidden"
+            id="vcf-upload"
+          />
+          <Button 
+            className="flex-1 sm:flex-none" 
+            variant="outline"
+            onClick={() => document.getElementById('vcf-upload')?.click()}
+          >
+            Import Contacts
+          </Button>
           <Button className="flex-1 sm:flex-none" onClick={handleExport}>
             Export Contacts
           </Button>
